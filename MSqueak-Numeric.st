@@ -214,7 +214,7 @@ asLowercase
 !MCharacter methodsFor: 'converting' stamp: 'jm 11/13/2002 18:19'!
 asString
 
-	^ MString with: self
+	^ MByteString with: self
 ! !
 
 !MCharacter methodsFor: 'converting' stamp: 'jm 10/28/2003 11:42'!
@@ -239,20 +239,20 @@ to: other
 MCharacter class
 	instanceVariableNames: ''!
 
-!MCharacter class methodsFor: 'instance creation' stamp: 'jm 11/28/2003 17:35'!
+!MCharacter class methodsFor: 'instance creation' stamp: 'sw 8/15/2018 19:45'!
 asciiValue: anInteger 
 	"Answer the Character whose ASCII value is anInteger."
 
-	^ CharacterTable at: anInteger + 1
+	^ self value: anInteger
 ! !
 
-!MCharacter class methodsFor: 'instance creation' stamp: 'jm 10/28/2003 11:33'!
+!MCharacter class methodsFor: 'instance creation' stamp: 'sw 8/15/2018 19:45'!
 digitValue: x 
 	"Answer the Character whose digit value is x. For example, answer $9 for x=9, $0 for x=0, $A for x=10, $Z for x=35."
 
 	| i |
 	i _ x asInteger.
-	^ CharacterTable at: (i < 10 ifTrue: [48 + i] ifFalse: [55 + i]) + 1
+	^ self value: (i < 10 ifTrue: [48 + i] ifFalse: [55 + i]) + 1
 ! !
 
 !MCharacter class methodsFor: 'instance creation' stamp: 'jm 12/8/2003 22:25'!
@@ -262,11 +262,14 @@ new
 	self cannotInstantiate.
 ! !
 
-!MCharacter class methodsFor: 'instance creation' stamp: 'jm 10/26/2003 17:39'!
+!MCharacter class methodsFor: 'instance creation' stamp: 'sw 8/15/2018 19:45'!
 value: anInteger 
 	"Answer the MCharacter whose ascii value is anInteger."
-
-	^ CharacterTable at: anInteger + 1
+	| ch |
+	CharacterTable ifNil: [CharacterTable := MArray new: 256].
+	ch := CharacterTable at: anInteger + 1.
+	ch ifNil: [ ch := super new. ch instVarAt:1 put: anInteger. ch. ].
+	^ ch.
 ! !
 
 
@@ -297,7 +300,6 @@ tab
 
 	^ 9 asCharacter
 ! !
-
 
 MMagnitude subclass: #MNumber
 	instanceVariableNames: ''
@@ -654,7 +656,7 @@ printOn: aStream
 printStringBase: base
 
 	| stream |
-	stream _ MWriteStream on: (MString new: 100).
+	stream _ MWriteStream on: (MByteString new: 100).
 	self printOn: stream base: base.
 	^ stream contents
 ! !
@@ -669,7 +671,7 @@ readFrom: stringOrStream
 	"Answer a number as described on aStream. The number may include a leading radix specification, as in 16rFADE."
 
 	| value base aStream sign |
-	aStream _ (stringOrStream class = MString)
+	aStream _ (stringOrStream class = MByteString)
 		ifTrue: [MReadStream on: stringOrStream]
 		ifFalse: [stringOrStream].
 	sign _ (aStream peekFor: $-) ifTrue: [-1] ifFalse: [1].
@@ -688,7 +690,7 @@ readFrom: stringOrStream base: base
 	"Answer a number as described on aStream in the given number base."
 
 	| aStream sign |
-	aStream _ (stringOrStream class = MString)
+	aStream _ (stringOrStream class = MByteString)
 		ifTrue: [MReadStream on: stringOrStream]
 		ifFalse: [stringOrStream].
 	sign _ (aStream peekFor: $-) ifTrue: [-1] ifFalse: [1].

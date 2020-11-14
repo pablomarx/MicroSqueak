@@ -422,7 +422,7 @@ perform: selector withArguments: anArray
 	documentation whatIsAPrimitive."
 
 	<primitive: 84>
-	(selector class = MSymbol)
+	(selector class = MByteSymbol)
 		ifFalse: [^ self error: 'selector argument must be a Symbol'].
 	self primitiveFailed! !
 
@@ -431,7 +431,7 @@ perform: selector withArguments: argArray inSuperclass: lookupClass
 	"NOTE:  This is just like perform:withArguments: except that the message lookup process begins, not with the receivers's class, but with the supplied superclass instead. It will fail if lookupClass cannot be found among the receiver's superclasses. Primitive. Essential. See Object documentation whatIsAPrimitive."
 
 	<primitive: 100>
-	(selector class = MSymbol)
+	(selector class = MByteSymbol)
 		ifFalse: [^ self error: 'selector argument must be a Symbol'].
 	(selector numArgs = argArray size)
 		ifFalse: [^ self error: 'incorrect number of arguments'].
@@ -455,7 +455,7 @@ printString
 	"Answer a string describing me."
 
 	| stream |
-	stream _ MWriteStream on: (MString new: 100).
+	stream _ MWriteStream on: (MByteString new: 100).
 	self printOn: stream.
 	^ stream contents
 ! !

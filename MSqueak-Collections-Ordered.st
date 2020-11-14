@@ -66,7 +66,7 @@ asByteArray
 asString
 	"Answer the receiver converted to a String."
 
-	^ (MString new: self size)
+	^ (MByteString new: self size)
 		replaceFrom: 1
 		to: self size
 		with: self
@@ -541,12 +541,12 @@ new: anInteger
 ! !
 
 
-MArrayedCollection variableByteSubclass: #MString
+MArrayedCollection variableByteSubclass: #MByteString
 	instanceVariableNames: ''
 	classVariableNames: 'AsciiOrder CaseInsensitiveOrder CaseSensitiveOrder LowercasingTable '
 	poolDictionaries: ''
 	category: 'MSqueak-Collections-Ordered'!
-!MString commentStamp: '<historical>' prior: 0!
+!MByteString commentStamp: '<historical>' prior: 0!
 I represent an ArrayedCollection of Character objects efficiently packed into 8-bit bytes.
 
 String support a vast array of useful methods, which can best be learned by browsing and trying out examples as you find them in the code.
@@ -561,7 +561,7 @@ String also inherits many useful methods from its hierarchy, such as
 !
 
 
-!MString methodsFor: 'accessing' stamp: 'jm 10/28/2003 11:31'!
+!MByteString methodsFor: 'accessing' stamp: 'jm 10/28/2003 11:31'!
 at: index 
 	"Primitive. Answer the Character stored in the field of the receiver
 	indexed by the argument. Fail if the index argument is not an Integer or
@@ -571,7 +571,7 @@ at: index
 	^ (super at: index) asCharacter
 ! !
 
-!MString methodsFor: 'accessing' stamp: 'jm 11/13/2002 16:28'!
+!MByteString methodsFor: 'accessing' stamp: 'jm 11/13/2002 16:28'!
 at: index put: aCharacter 
 	"Primitive. Store the Character in the field of the receiver indicated by
 	the index. Fail if the index is not an Integer or is out of bounds, or if
@@ -586,7 +586,7 @@ at: index put: aCharacter
 				ifFalse: [self errorNonIntegerIndex]]
 		ifFalse: [self error: 'Strings only store Characters']! !
 
-!MString methodsFor: 'accessing' stamp: 'jm 12/8/2003 23:33'!
+!MByteString methodsFor: 'accessing' stamp: 'jm 12/8/2003 23:33'!
 findString: key startingAt: start caseSensitive: caseSensitive
 	"Answer the index in this String at which the substring key first occurs at or after the given starting index. The match can be case-sensitive or not. Answer zero if no match is found."
 
@@ -597,7 +597,7 @@ findString: key startingAt: start caseSensitive: caseSensitive
 		matchTable: (caseSensitive ifTrue: [CaseSensitiveOrder] ifFalse: [CaseInsensitiveOrder])
 ! !
 
-!MString methodsFor: 'accessing' stamp: 'jm 12/8/2003 23:36'!
+!MByteString methodsFor: 'accessing' stamp: 'jm 12/8/2003 23:36'!
 findTokens: delimiters
 	"Answer the collection of tokens that result from parsing self. Any character in the String delimiters marks a border. Several delimiters in a row are considered as just one separation."
 
@@ -612,13 +612,13 @@ findTokens: delimiters
 	^ tokens
 ! !
 
-!MString methodsFor: 'accessing' stamp: 'jm 10/26/2003 17:21'!
+!MByteString methodsFor: 'accessing' stamp: 'jm 10/26/2003 17:21'!
 indexOf: aCharacter startingAt: start
 
 	^ self indexOfAscii: aCharacter asciiValue inString: self startingAt: start
 ! !
 
-!MString methodsFor: 'accessing' stamp: 'jm 12/31/2003 12:48'!
+!MByteString methodsFor: 'accessing' stamp: 'jm 12/31/2003 12:48'!
 indexOf: aCharacter startingAt: startIndex ifAbsent: absentBlock
 	"Answer the index of the given Character within me starting the search at the given index. If I do not contain the Character, answer the result of evaluating the given block."
 
@@ -629,7 +629,7 @@ indexOf: aCharacter startingAt: startIndex ifAbsent: absentBlock
 		ifFalse: [^ ans]
 ! !
 
-!MString methodsFor: 'accessing' stamp: 'jm 12/8/2003 23:24'!
+!MByteString methodsFor: 'accessing' stamp: 'jm 12/8/2003 23:24'!
 numArgs
 	"Answer the number of arguments that the receiver would take considered as a selector or -1 if it couldn't be a selector."
 
@@ -649,7 +649,7 @@ numArgs
 	^ -1
 ! !
 
-!MString methodsFor: 'accessing'!
+!MByteString methodsFor: 'accessing'!
 size
 	"Primitive. Answer the number of indexable fields in the receiver. This
 	value is the same as the largest legal subscript. Essential. See Object
@@ -659,44 +659,44 @@ size
 	^self basicSize! !
 
 
-!MString methodsFor: 'comparing' stamp: 'di 2/27/98 12:16'!
+!MByteString methodsFor: 'comparing' stamp: 'di 2/27/98 12:16'!
 < aString 
 	"Answer whether the receiver sorts before aString.
 	The collation order is simple ascii (with case differences)."
 
 	^ (self compare: self with: aString collated: AsciiOrder) = 1! !
 
-!MString methodsFor: 'comparing' stamp: 'di 2/27/98 12:17'!
+!MByteString methodsFor: 'comparing' stamp: 'di 2/27/98 12:17'!
 <= aString 
 	"Answer whether the receiver sorts before or equal to aString.
 	The collation order is simple ascii (with case differences)."
 
 	^ (self compare: self with: aString collated: AsciiOrder) <= 2! !
 
-!MString methodsFor: 'comparing' stamp: 'jm 11/13/2002 18:48'!
+!MByteString methodsFor: 'comparing' stamp: 'jm 11/13/2002 18:48'!
 = aString 
 	"Answer whether the receiver sorts equally as aString.
 	The collation order is simple ascii (with case differences)."
 
-	aString species == MString ifFalse: [^ false].
+	aString species == MByteString ifFalse: [^ false].
 
 	^ (self compare: self with: aString collated: AsciiOrder) = 2! !
 
-!MString methodsFor: 'comparing' stamp: 'di 2/27/98 12:17'!
+!MByteString methodsFor: 'comparing' stamp: 'di 2/27/98 12:17'!
 > aString 
 	"Answer whether the receiver sorts after aString.
 	The collation order is simple ascii (with case differences)."
 
 	^ (self compare: self with: aString collated: AsciiOrder) = 3! !
 
-!MString methodsFor: 'comparing' stamp: 'di 2/27/98 12:18'!
+!MByteString methodsFor: 'comparing' stamp: 'di 2/27/98 12:18'!
 >= aString 
 	"Answer whether the receiver sorts after or equal to aString.
 	The collation order is simple ascii (with case differences)."
 
 	^ (self compare: self with: aString collated: AsciiOrder) >= 2! !
 
-!MString methodsFor: 'comparing' stamp: 'di 2/27/98 12:41'!
+!MByteString methodsFor: 'comparing' stamp: 'di 2/27/98 12:41'!
 compare: aString 
 	"Answer a comparison code telling how the receiver sorts relative to aString:
 		1 - before
@@ -707,7 +707,7 @@ compare: aString
 
 	^ self compare: self with: aString collated: CaseInsensitiveOrder! !
 
-!MString methodsFor: 'comparing'!
+!MByteString methodsFor: 'comparing'!
 hash
 
 	| l m |
@@ -722,14 +722,14 @@ hash
 	^(self at: 1) asciiValue * 48 + ((self at: (m - 1)) asciiValue + l)! !
 
 
-!MString methodsFor: 'converting' stamp: 'jm 11/24/2003 07:50'!
+!MByteString methodsFor: 'converting' stamp: 'jm 11/24/2003 07:50'!
 asByteArray
 	"Answer a ByteArray containing the ASCII values of my characters. Uses a fast primitive that avoids character conversion."
 
 	^ (MByteArray new: self size) replaceFrom: 1 to: self size with: self
 ! !
 
-!MString methodsFor: 'converting' stamp: 'jm 12/8/2003 23:27'!
+!MByteString methodsFor: 'converting' stamp: 'jm 12/8/2003 23:27'!
 asLowercase
 	"Answer a String made up from the receiver whose characters are all lowercase."
 
@@ -739,23 +739,23 @@ asLowercase
 	^ result
 ! !
 
-!MString methodsFor: 'converting' stamp: 'jm 5/14/1998 10:40'!
+!MByteString methodsFor: 'converting' stamp: 'jm 5/14/1998 10:40'!
 asString
 	"Answer this string."
 
 	^ self
 ! !
 
-!MString methodsFor: 'converting' stamp: 'jm 11/30/2003 17:20'!
+!MByteString methodsFor: 'converting' stamp: 'jm 11/30/2003 17:20'!
 asSymbol
 	"This is the only place that new Symbols are created. A Symbol is created if and only if there is not already a Symbol with its contents in existance."
 
-	MSymbol allInstancesDo: [:sym | self = sym ifTrue: [^ sym]].
-	^ (MSymbol basicNew: self size) initFrom: self
+	MByteSymbol allInstancesDo: [:sym | self = sym ifTrue: [^ sym]].
+	^ (MByteSymbol basicNew: self size) initFrom: self
 ! !
 
 
-!MString methodsFor: 'printing' stamp: 'jm 10/29/2003 11:21'!
+!MByteString methodsFor: 'printing' stamp: 'jm 10/29/2003 11:21'!
 printOn: aStream 
 	"Print inside string quotes, doubling inbedded quotes."
 
@@ -768,7 +768,7 @@ printOn: aStream
 ! !
 
 
-!MString methodsFor: 'private' stamp: 'jm 11/30/2003 16:35'!
+!MByteString methodsFor: 'private' stamp: 'jm 11/30/2003 16:35'!
 compare: string1 with: string2 collated: order
 	"Return 1, 2 or 3, if string1 is <, =, or > string2, with the collating order of characters given by the order array."
 
@@ -785,7 +785,7 @@ compare: string1 with: string2 collated: order
 	len1 < len2 ifTrue: [^ 1] ifFalse: [^ 3].
 ! !
 
-!MString methodsFor: 'private'!
+!MByteString methodsFor: 'private'!
 findDelimiters: delimiters startingAt: start 
 	"Answer the index of the character within the receiver, starting at start, that matches one of the delimiters. If the receiver does not contain any of the delimiters, answer size + 1."
 
@@ -793,7 +793,7 @@ findDelimiters: delimiters startingAt: start
 		delimiters do: [:delim | delim = (self at: i) ifTrue: [^ i]]].
 	^ self size + 1! !
 
-!MString methodsFor: 'private' stamp: 'jm 11/30/2003 16:38'!
+!MByteString methodsFor: 'private' stamp: 'jm 11/30/2003 16:38'!
 findSubstring: key in: body startingAt: start matchTable: matchTable
 	"Answer the index in the string body at which the substring key first occurs, at or beyond start. The match is determined using matchTable, which can be used to effect, eg, case-insensitive matches. If no match is found, zero will be returned."
 	"Note: The algorithm below is not optimum because it is intended to be translated to C."
@@ -817,7 +817,7 @@ findSubstring: key in: body startingAt: start matchTable: matchTable
 ' ' findSubstring: 'abc' in: 'abcdefABcd' startingAt: 2 matchTable: CaseInsensitiveOrder 7
 "! !
 
-!MString methodsFor: 'private' stamp: 'jm 11/30/2003 16:39'!
+!MByteString methodsFor: 'private' stamp: 'jm 11/30/2003 16:39'!
 indexOfAscii: anInteger inString: aString startingAt: start
 
 	| stringSize |
@@ -828,13 +828,13 @@ indexOfAscii: anInteger inString: aString startingAt: start
 	^ 0
 ! !
 
-!MString methodsFor: 'private'!
+!MByteString methodsFor: 'private'!
 replaceFrom: start to: stop with: replacement startingAt: repStart 
 	"Primitive. This destructively replaces elements from start to stop in the receiver starting at index, repStart, in the collection, replacement. Answer the receiver. Range checks are performed in the primitive only. Optional. See Object documentation whatIsAPrimitive."
 	<primitive: 105>
 	super replaceFrom: start to: stop with: replacement startingAt: repStart! !
 
-!MString methodsFor: 'private' stamp: 'jm 12/8/2003 23:29'!
+!MByteString methodsFor: 'private' stamp: 'jm 12/8/2003 23:29'!
 skipDelimiters: delimiters startingAt: start 
 	"Answer the index of the first character in this string starting at the given index that does NOT match one of the delimiters. If the receiver does not contain any of the delimiters, answer size + 1. Assumes the delimiters to be a non-empty string."
 
@@ -843,7 +843,7 @@ skipDelimiters: delimiters startingAt: start
 	^ self size + 1
 ! !
 
-!MString methodsFor: 'private' stamp: 'jm 11/30/2003 16:39'!
+!MByteString methodsFor: 'private' stamp: 'jm 11/30/2003 16:39'!
 translate: aString from: start  to: stop table: table
 	"Translate the characters in the given string in place using the given mapping table."
 
@@ -854,10 +854,10 @@ translate: aString from: start  to: stop table: table
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-MString class
+MByteString class
 	instanceVariableNames: ''!
 
-!MString class methodsFor: 'class initialization' stamp: 'jm 11/24/2003 07:57'!
+!MByteString class methodsFor: 'class initialization' stamp: 'jm 11/24/2003 07:57'!
 initialize
 	"self initialize"
 
@@ -887,7 +887,7 @@ initialize
 ! !
 
 
-!MString class methodsFor: 'constants' stamp: 'jm 10/28/2003 11:45'!
+!MByteString class methodsFor: 'constants' stamp: 'jm 10/28/2003 11:45'!
 cr
 	"Answer a string containing a carriage return character."
 
@@ -895,12 +895,12 @@ cr
 ! !
 
 
-MString variableByteSubclass: #MSymbol
+MByteString variableByteSubclass: #MByteSymbol
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MSqueak-Collections-Ordered'!
-!MSymbol commentStamp: '<historical>' prior: 0!
+!MByteSymbol commentStamp: '<historical>' prior: 0!
 I represent a String that has a single unique instance in the system. These unique string objects are used by the system as message selectors.
 
 Notes:
@@ -909,71 +909,71 @@ Notes:
 !
 
 
-!MSymbol methodsFor: 'accessing' stamp: 'jm 10/27/2003 07:20'!
+!MByteSymbol methodsFor: 'accessing' stamp: 'jm 10/27/2003 07:20'!
 at: anInteger put: anObject 
 	"You cannot modify the receiver."
 
 	self errorNoModification.
 ! !
 
-!MSymbol methodsFor: 'accessing' stamp: 'jm 10/27/2003 07:20'!
+!MByteSymbol methodsFor: 'accessing' stamp: 'jm 10/27/2003 07:20'!
 replaceFrom: start to: stop with: replacement startingAt: repStart
 
 	self errorNoModification.
 ! !
 
 
-!MSymbol methodsFor: 'comparing' stamp: 'jm 10/27/2003 07:20'!
+!MByteSymbol methodsFor: 'comparing' stamp: 'jm 10/27/2003 07:20'!
 = anObject
 
 	^ self == anObject
 ! !
 
-!MSymbol methodsFor: 'comparing' stamp: 'jm 10/27/2003 07:21'!
+!MByteSymbol methodsFor: 'comparing' stamp: 'jm 10/27/2003 07:21'!
 hash
 
 	^ self identityHash
 ! !
 
 
-!MSymbol methodsFor: 'copying' stamp: 'jm 12/2/2003 22:24'!
+!MByteSymbol methodsFor: 'copying' stamp: 'jm 12/2/2003 22:24'!
 basicCopy
 	"Answer myself because Symbols are unique."
 ! !
 
 
-!MSymbol methodsFor: 'converting' stamp: 'jm 10/27/2003 07:24'!
+!MByteSymbol methodsFor: 'converting' stamp: 'jm 10/27/2003 07:24'!
 asString 
 	"Answer a string containing my characters."
 
 	| sz result |
 	sz _ self size.
-	result _ MString new: sz.
+	result _ MByteString new: sz.
 	result replaceFrom: 1 to: sz with: self startingAt: 1. 
 	^ result
 ! !
 
-!MSymbol methodsFor: 'converting' stamp: 'jm 11/30/2003 17:12'!
+!MByteSymbol methodsFor: 'converting' stamp: 'jm 11/30/2003 17:12'!
 asSymbol
 
 	^ self
 ! !
 
 
-!MSymbol methodsFor: 'printing' stamp: 'jm 10/27/2003 07:27'!
+!MByteSymbol methodsFor: 'printing' stamp: 'jm 10/27/2003 07:27'!
 printOn: aStream
 
 	aStream nextPutAll: self.
 ! !
 
 
-!MSymbol methodsFor: 'private' stamp: 'jm 10/27/2003 07:18'!
+!MByteSymbol methodsFor: 'private' stamp: 'jm 10/27/2003 07:18'!
 errorNoModification
 
 	self error: 'Symbols can not be modified.'
 ! !
 
-!MSymbol methodsFor: 'private' stamp: 'jm 11/30/2003 17:18'!
+!MByteSymbol methodsFor: 'private' stamp: 'jm 11/30/2003 17:18'!
 initFrom: aString
 	"Warning!! Use only to initialize new Symbols. Symbols are assumed to be immutable there after."
 
@@ -981,22 +981,22 @@ initFrom: aString
 	super replaceFrom: 1 to: self size with: aString startingAt: 1.
 ! !
 
-!MSymbol methodsFor: 'private' stamp: 'jm 11/13/2002 18:28'!
+!MByteSymbol methodsFor: 'private' stamp: 'jm 11/13/2002 18:28'!
 species
 
-	^ MString
+	^ MByteString
 ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-MSymbol class
+MByteSymbol class
 	instanceVariableNames: ''!
 
-!MSymbol class methodsFor: 'instance creation' stamp: 'jm 12/8/2003 22:31'!
+!MByteSymbol class methodsFor: 'instance creation' stamp: 'jm 12/8/2003 22:31'!
 new: size
 	"Symbols are unique. You can create a new Symbol from a String using 'asSymbol'."
 
 	self cannotInstantiate.
 ! !
 
-MString initialize!
+MByteString initialize!

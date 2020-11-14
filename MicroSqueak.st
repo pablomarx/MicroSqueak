@@ -27,8 +27,8 @@ analyzeLiterals
 							ifFalse: [bigInts _ bigInts + 1]]]
 			ifFalse: [
 				o class == Array ifTrue: [arrayBytes _ arrayBytes + (4 * o size)].
-				o class == String ifTrue: [stringBytes _ stringBytes + o size].
-				o class == Symbol ifTrue: [symbolBytes _ symbolBytes + o size].
+				o class == ByteString ifTrue: [stringBytes _ stringBytes + o size].
+				o class == ByteSymbol ifTrue: [symbolBytes _ symbolBytes + o size].
 				oldCount _ results at: o class name ifAbsent: [0].
 				results at: o class name put: oldCount + 1]].
 	results at: #Float put: floats.
@@ -319,7 +319,7 @@ buildCompactClassArray
 	| ccNames c |
 	ccNames _ #(
 		CompiledMethod
-		Symbol
+		ByteSymbol
 		Array
 		ByteArray
 		LargePositiveInteger
@@ -328,7 +328,7 @@ buildCompactClassArray
 		Association
 		Metaclass
 		Character
-		String
+		ByteString
 		Float
 		BlockContext
 		MethodContext
@@ -373,7 +373,7 @@ buildSpecialObjectsArray
 	specialObjects at: 4 put: (globals associationAt: #Processor).
 	specialObjects at: 5 put: nil.  "Bitmap"
 	specialObjects at: 6 put: (globals at: #SmallInteger).
-	specialObjects at: 7 put: (globals at: #String).
+	specialObjects at: 7 put: (globals at: #ByteString).
 	specialObjects at: 8 put: (globals at: #Array).
 	specialObjects at: 9 put: globals. 
 	specialObjects at: 10 put: (globals at: #Float ifAbsent: [nil]).
@@ -440,9 +440,9 @@ checkLayoutOfVMClasses
 		MethodContext
 		Array
 		ByteArray
-		String
+		ByteString
 		Character
-		Symbol
+		ByteSymbol
 		Dictionary
 		LargePositiveInteger
 		LargeNegativeInteger
@@ -641,7 +641,7 @@ sortedObjects
 		isOther _ true.
 		objClass _ o class.
 		Character = objClass ifTrue: [characters add: o. isOther _ false].
-		Symbol = objClass ifTrue: [symbols add: o. isOther _ false].
+		ByteSymbol = objClass ifTrue: [symbols add: o. isOther _ false].
 		CompiledMethod = objClass ifTrue: [compiledMethods add: o. isOther _ false].
 		Float = objClass ifTrue: [floats add: o. isOther _ false].
 		isOther ifTrue: [other add: o]].
@@ -692,7 +692,7 @@ writeMemoryImage: aByteArray toFileNamed: fileName
 	f int32: 0.						"location of start of image in memory"
 	f int32: specialObjectsOop.		"oop of the special objects array"
 	f int32: 999.						"last identity hash value"
-	f int32: ((256 << 16) + 128).		"size of Display"
+	f int32: ((800 << 16) + 600).		"size of Display"
 	f int32: 0.						"flag indicating full-screen mode"
 	1 to: 8 do: [:i | f int32: 0].		"fill remaining 8 header words with zeros"
 
@@ -928,4 +928,14 @@ trace: obj into: toDo from: srcObj
 	objects add: obj.
 	toDo add: obj.
 ! !
+
+
+!Object methodsFor: 'testing' stamp: 'sw 8/15/2018 19:45'!
+isSmallInteger
+	^ false.! !
+	
+
+!SmallInteger methodsFor: 'testing' stamp: 'sw 8/15/2018 19:45'!
+isSmallInteger
+	^ true.! !
 

@@ -46,7 +46,7 @@ openReadWrite: fileName
 !MFile methodsFor: 'file ops' stamp: 'jm 12/8/2003 23:44'!
 cr
 
-	self nextPutAll: (MString with: MCharacter cr).
+	self nextPutAll: (MByteString with: MCharacter cr).
 ! !
 
 !MFile methodsFor: 'file ops' stamp: 'jm 10/1/2008 20:05'!
