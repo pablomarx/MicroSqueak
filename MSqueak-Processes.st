@@ -279,7 +279,7 @@ installIdleProcess
 	idleList _ suspendedProcessLists at: 1.
 	[idleList isEmpty] whileFalse: [idleList first terminate].
 
-	idleProc _ MProcess for: [self idleProcess] priority: 1.
+	idleProc _ MProcess for: ([self idleProcess] asContext) priority: 1.
 	(suspendedProcessLists at: idleProc priority) addLast: idleProc
 ! !
 
@@ -287,7 +287,7 @@ installIdleProcess
 installStartProcess
 	"Install the startup process as the active process. This process will run when MicroSqueak is started."
 
-	activeProcess _ MProcess for: [MSystem start] priority: 3.
+	activeProcess _ MProcess for: ([MSystem start] asContext) priority: 3.
 ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!

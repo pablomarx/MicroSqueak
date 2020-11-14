@@ -177,6 +177,12 @@ isSmallInteger
 	^ false
 ! !
 
+!MObject methodsFor: 'testing' stamp: 'sw 8/21/2018 22:39'!
+isVariableBinding
+
+	^ false
+! !
+
 !MObject methodsFor: 'testing' stamp: 'jm 11/14/2002 14:35'!
 pointsTo: anObject
 	"Answer true if the receiver contains a reference to the given object."
@@ -222,6 +228,14 @@ identityHash
 	<primitive: 75>
 	self primitiveFailed
 ! !
+
+!MObject methodsFor: 'comparing' stamp: 'yo 11/4/2010 22:34'!
+scaledIdentityHash
+	"For identityHash values returned by primitive 75, answer
+	such values times 2^18.  Otherwise, match the existing
+	identityHash implementation"
+
+	^self identityHash * 262144 "bitShift: 18"! !
 
 !MObject methodsFor: 'comparing' stamp: 'jm 11/14/2002 14:22'!
 ~= anObject 
@@ -274,6 +288,22 @@ copy
 	^ MAssociation new key: self value: anObject
 ! !
 
+!MObject methodsFor: 'converting' stamp: 'yo 11/4/2010 22:35'!
+asSetElement
+	"Answer an object, which can be put into a Set as element , wrapped
+	by one of SetElement instance, if necessary. 
+	Default implementation is to answer self"
+! !
+
+!MObject methodsFor: 'converting' stamp: 'yo 11/4/2010 22:38'!
+enclosedSetElement
+	"The receiver is included into a set as an element. 
+	Since some objects require wrappers (see SetElement) to be able to be included into a Set,
+	a set sends this message to its element to make sure it getting real object,
+	instead of its wrapper.
+	Only SetElement instance or its subclasses allowed to answer something different than receiver itself"
+	
+! !
 
 !MObject methodsFor: 'class membership' stamp: 'jm 12/2/2003 21:32'!
 class
@@ -757,6 +787,12 @@ printOn: aStream
 
 	aStream nextPutAll: 'nil'.
 ! !
+
+!MUndefinedObject methodsFor: 'sets support' stamp: 'yo 11/8/2010 11:31'!
+asSetElement
+	"Since nil is a singleton, we need only a single wrapper instance to represent it in set,
+	created in advance"
+	^ MSetElement withNil! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 

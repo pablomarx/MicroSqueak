@@ -1,3 +1,387 @@
+MObject variableSubclass: #MAdditionalMethodState
+	instanceVariableNames: 'method selector'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'MSqueak-Methods'!
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:36'!
+at: aKey
+	"Answer the property value or pragma associated with aKey."
+	
+	^self at: aKey ifAbsent: [self error: 'not found']! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:36'!
+at: aKey ifAbsent: aBlock
+	"Answer the property value or pragma associated with aKey or,
+	 if aKey isn't found, answer the result of evaluating aBlock."
+
+	1 to: self basicSize do:
+		[:i |
+		| propertyOrPragma "<Association|Pragma>" |
+		(propertyOrPragma := self basicAt: i) key == aKey ifTrue:
+			[^propertyOrPragma isVariableBinding
+				ifTrue: [propertyOrPragma value]
+				ifFalse: [propertyOrPragma]]].
+	^aBlock value! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:36'!
+at: aKey put: aValue
+	"Replace the property value or pragma associated with aKey."
+	| keyAlreadyExists |
+	keyAlreadyExists := false.
+	
+	1 to: self basicSize do:
+		[:i |
+		| propertyOrPragma "<Association|Pragma>" |
+		(propertyOrPragma := self basicAt: i) key == aKey ifTrue: [
+			keyAlreadyExists := true.
+			propertyOrPragma isVariableBinding
+				ifTrue: [propertyOrPragma value: aValue]
+				ifFalse: [self basicAt: i put: aValue]]].
+	
+	keyAlreadyExists ifFalse: [
+		method propertyValueAt: aKey put: aValue ].
+	
+	^ aValue! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:36'!
+copyWith: aPropertyOrPragma "<Association|Pragma>"
+	"Answer a copy of the receiver which includes aPropertyOrPragma"
+	| bs copy |
+	(MAssociation == aPropertyOrPragma class
+	 or: [MPragma == aPropertyOrPragma class]) ifFalse:
+		[self error: self class name, ' instances should hold only Associations or Pragmas.'].
+	copy := self class new: (bs := self basicSize) + 1.
+	1 to: bs do:
+		[:i|
+		copy basicAt: i put: (self basicAt: i)].
+	copy basicAt: bs + 1 put: aPropertyOrPragma.
+	^copy
+		selector: selector;
+		setMethod: method;
+		yourself
+! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:42'!
+copyWithout: aPropertyOrPragma "<Association|Pragma>"
+	"Answer a copy of the receiver which no longer includes aPropertyOrPragma"
+	| bs copy offset |
+	copy := self class new: (bs := self basicSize) - ((self includes: aPropertyOrPragma)
+													ifTrue: [1]
+													ifFalse: [0]).
+	offset := 0.
+	1 to: bs do:
+		[:i|
+		(self basicAt: i) = aPropertyOrPragma
+			ifTrue: [offset := 1]
+			ifFalse: [copy basicAt: i - offset put: (self basicAt: i)]].
+	^copy
+		selector: selector;
+		setMethod: method;
+		yourself
+! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:35'!
+includes: aPropertyOrPragma "<Association|Pragma>"
+	"Test if the property or pragma is present."
+
+	1 to: self basicSize do:
+		[:i |
+		(self basicAt: i) = aPropertyOrPragma ifTrue:
+			[^true]].
+	^false! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:36'!
+includesKey: aKey
+	"Test if the property aKey or pragma with selector aKey is present."
+
+	1 to: self basicSize do:
+		[:i |
+		(self basicAt: i) key == aKey ifTrue:
+			[^true]].
+	^false! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:41'!
+includesProperty: aKey
+	"Test if the property aKey is present."
+
+	1 to: self basicSize do: [:i |
+		| propertyOrPragma "<Association|Pragma>" |
+		propertyOrPragma := self basicAt: i.
+		(propertyOrPragma isVariableBinding
+		 and: [propertyOrPragma key == aKey]) ifTrue:
+			[^true]].
+	^false! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:35'!
+isEmpty
+	^self basicSize = 0! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:39'!
+isMethodProperties
+	^ true! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:42'!
+propertyValueAt: aKey ifAbsent: aBlock
+	"Answer the property value associated with aKey or, if aKey isn't found, answer the result of evaluating aBlock."
+
+	1 to: self basicSize do: [:i |
+		| propertyOrPragma "<Association|Pragma>" |
+		propertyOrPragma := self basicAt: i.
+		(propertyOrPragma isVariableBinding
+		 and: [propertyOrPragma key == aKey]) ifTrue:
+			[^propertyOrPragma value]].
+	^aBlock value! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:35'!
+removeKey: aKey
+	"Remove the property with aKey. Answer the property or raise an error if aKey isn't found."
+	
+	^ self removeKey: aKey ifAbsent: [ self error: 'Property not found' ].! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:35'!
+removeKey: aKey ifAbsent: aBlock
+	"Remove the property with aKey. Answer the value or, if aKey isn't found, answer the result of evaluating aBlock."
+	
+	1 to: self basicSize do: [:i |
+		| propertyOrPragma "<Association|Pragma>" |
+		propertyOrPragma := self basicAt: i.
+		(propertyOrPragma isVariableBinding
+				ifTrue: [propertyOrPragma key]
+				ifFalse: [propertyOrPragma keyword])
+			== aKey ifTrue:
+			[^method removeProperty: aKey]].
+	^aBlock value! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:30'!
+selector
+	^selector! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:30'!
+selector: aSymbol
+	selector := aSymbol! !
+
+!MAdditionalMethodState methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:37'!
+setMethod: aMethod
+	method := aMethod.
+	1 to: self basicSize do:
+		[:i| | propertyOrPragma "<Association|Pragma>" |
+		(propertyOrPragma := self basicAt: i) isVariableBinding ifFalse:
+			[propertyOrPragma setMethod: aMethod]]! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+MAdditionalMethodState class
+	instanceVariableNames: ''!
+
+!MAdditionalMethodState class methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:40'!
+selector: aSelector with: aPropertyOrPragma
+	^(self basicNew: 1)
+		selector: aSelector;
+		basicAt: 1 put: aPropertyOrPragma;
+		yourself! !
+
+
+MObject variableSubclass: #MBlockClosure
+	instanceVariableNames: 'outerContext startpc numArgs'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'MSqueak-Methods'!
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/23/2018 00:02'!
+asContext
+	"Create a MethodContext that is ready to execute self.  Assumes self takes no args (if it does the args will be nil)"
+
+	^self asContextWithSender: nil! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:16'!
+asContextWithSender: aContext
+	"Inner private support method for evaluation.  Do not use unless you know what you're doing."
+
+	^(MMethodContext newForMethod: outerContext method)
+		setSender: aContext
+		receiver: outerContext receiver
+		method: outerContext method
+		closure: self
+		startpc: startpc! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 21:55'!
+home
+	^outerContext home! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 21:55'!
+ifError: errorHandlerBlock
+	"Evaluate the block represented by the receiver, and normally return it's value.  If an error occurs, the errorHandlerBlock is evaluated, and it's value is instead returned.  The errorHandlerBlock must accept zero, one, or two parameters (the error message and the receiver)."
+	"Examples:
+		[1 whatsUpDoc] ifError: [:err :rcvr | 'huh?'].
+		[1 / 0] ifError: [:err :rcvr |
+			'ZeroDivide' = err
+				ifTrue: [Float infinity]
+				ifFalse: [self error: err]]
+"
+
+	^ self on: Error do: [:ex |
+		errorHandlerBlock valueWithPossibleArgs: {ex description. ex receiver}]! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 21:55'!
+method
+	^outerContext method! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/23/2018 00:23'!
+msecs
+	"Answer the number of milliseconds it took to evaluate this block."
+
+	| startMSecs |
+	startMSecs _ MSystem milliseconds.
+	self value.
+	^ MSystem milliseconds - startMSecs
+! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 21:56'!
+numArgs
+	"Answer the number of arguments that must be used to evaluate this block"
+
+	^numArgs! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:18'!
+numArgsError: numArgsForInvocation
+
+	| printNArgs |
+	printNArgs := [:n| n printString, ' argument', (n = 1 ifTrue: [''] ifFalse:['s'])]. 
+	self error: 
+			'This block accepts ', (printNArgs value: numArgs), 
+			', but was called with ', (printNArgs value: numArgsForInvocation), '.'! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:16'!
+numCopiedValues
+	"Answer the number of copied values of the receiver.  Since these are
+	 stored in the receiver's indexable fields this is the receiver's basic size.
+	 Primitive. Answer the number of indexable variables in the receiver. 
+	 This value is the same as the largest legal subscript."
+
+	<primitive: 62>
+	^self basicSize! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:18'!
+on: exception do: handlerAction
+	"Evaluate the receiver in the scope of an exception handler."
+
+	<primitive: 199>  "just a marker, fail and execute the following"
+	^ self value! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:33'!
+outerContext
+	^outerContext! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 21:56'!
+printOn: aStream
+	aStream nextPutAll: '[closure] in '.
+	outerContext printOn: aStream! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:19'!
+receiver
+	^outerContext receiver! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 21:56'!
+sender
+	"Answer the context that sent the message that created the receiver."
+
+	^outerContext sender! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 21:56'!
+value
+	"Activate the receiver, creating a closure activation (MethodContext)
+	 whose closure is the receiver and whose caller is the sender of this message.
+	 Supply the copied values to the activation as its arguments and copied temps.
+	 Primitive. Optional (but you're going to want this for performance)."
+	| newContext ncv |
+	<primitive: 201>
+	numArgs ~= 0 ifTrue:
+		[self numArgsError: 0].
+	newContext := self asContextWithSender: thisContext sender.
+	(ncv := self numCopiedValues) > 0 ifTrue:
+		[newContext stackp: ncv.
+		1 to: ncv do: "nil basicSize = 0"
+			[:i| newContext at: i put: (self at: i)]].
+	thisContext privSender: newContext! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 21:56'!
+value: anArg
+	"Activate the receiver, creating a closure activation (MethodContext)
+	 whose closure is the receiver and whose caller is the sender of this message.
+	 Supply the argument and copied values to the activation as its arguments and copied temps.
+	 Primitive. Optional (but you're going to want this for performance)."
+	| newContext ncv |
+	<primitive: 202>
+	numArgs ~= 1 ifTrue:
+		[self numArgsError: 1].
+	newContext := self asContextWithSender: thisContext sender.
+	ncv := self numCopiedValues.
+	newContext stackp: ncv + 1.
+	newContext at: 1 put: anArg.
+	1 to: ncv do:
+		[:i| newContext at: i + 1 put: (self at: i)].
+	thisContext privSender: newContext! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 21:56'!
+value: firstArg value: secondArg
+	"Activate the receiver, creating a closure activation (MethodContext)
+	 whose closure is the receiver and whose caller is the sender of this message.
+	 Supply the arguments and copied values to the activation as its arguments and copied temps.
+	 Primitive. Optional (but you're going to want this for performance)."
+	| newContext ncv |
+	<primitive: 203>
+	numArgs ~= 2 ifTrue:
+		[self numArgsError: 2].
+	newContext := self asContextWithSender: thisContext sender.
+	ncv := self numCopiedValues.
+	newContext stackp: ncv + 2.
+	newContext at: 1 put: firstArg.
+	newContext at: 2 put: secondArg.
+	1 to: ncv do:
+		[:i| newContext at: i + 2 put: (self at: i)].
+	thisContext privSender: newContext! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 21:56'!
+valueWithArguments: anArray
+	"Activate the receiver, creating a closure activation (MethodContext)
+	 whose closure is the receiver and whose caller is the sender of this message.
+	 Supply the arguments in an anArray and copied values to the activation as its arguments and copied temps.
+	 Primitive. Optional (but you're going to want this for performance)."
+	| newContext ncv |
+	<primitive: 206>
+	numArgs ~= anArray size ifTrue:
+		[self numArgsError: anArray size].
+	newContext := self asContextWithSender: thisContext sender.
+	ncv := self numCopiedValues.
+	newContext stackp: ncv + numArgs.
+	1 to: numArgs do:
+		[:i| newContext at: i put: (anArray at: i)].
+	1 to: ncv do:
+		[:i| newContext at: i + numArgs put: (self at: i)].
+	thisContext privSender: newContext! !
+
+!MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:16'!
+valueWithPossibleArgs: anArray 
+
+	^numArgs = 0
+		ifTrue: [self value]
+		ifFalse:
+			[self valueWithArguments:
+				(numArgs = anArray size
+					ifTrue: [anArray]
+					ifFalse:
+						[numArgs > anArray size
+							ifTrue: [anArray, (MArray new: numArgs - anArray size)]
+							ifFalse: [anArray copyFrom: 1 to: numArgs]])]! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+MBlockClosure class
+	instanceVariableNames: ''!
+
+
+
 MByteArray variableByteSubclass: #MCompiledMethod
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -62,26 +446,161 @@ objectAt: index put: value
 	self primitiveFailed
 ! !
 
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:42'!
+literalAt: index 
+	"Answer the literal indexed by the argument."
+
+	^self objectAt: index + 1! !
+
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:40'!
+literalAt: index put: value 
+	"Replace the literal indexed by the first argument with the second 
+	argument. Answer the second argument."
+
+	^self objectAt: index + 1 put: value! !
+
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:31'!
+method
+	"polymorphic with closure"
+
+	^ self! !
+
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:31'!
+numArgs
+	"Answer the number of arguments the receiver takes."
+
+	^ (self header bitShift: -24) bitAnd: 16r0F! !
+
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:41'!
+penultimateLiteral
+	"Answer the penultimate literal of the receiver, which holds either
+	 the receiver's selector or its properties (which will hold the selector)."
+	| pIndex |
+	^(pIndex := self numLiterals - 1) > 0 
+		ifTrue: [self literalAt: pIndex]
+		ifFalse: [nil]! !
+
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:39'!
+penultimateLiteral: anObject
+	"Answer the penultimate literal of the receiver, which holds either
+	 the receiver's selector or its properties (which will hold the selector)."
+	| pIndex |
+	(pIndex := self numLiterals - 1) > 0 
+		ifTrue: [self literalAt: pIndex put: anObject]
+		ifFalse: [self error: 'insufficient literals']! !
+
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:42'!
+propertyValueAt: propName ifAbsent: aBlock
+	| propertiesOrSelector |
+	^(propertiesOrSelector := self penultimateLiteral) isMethodProperties
+		ifTrue: [propertiesOrSelector propertyValueAt: propName ifAbsent: aBlock]
+		ifFalse: [aBlock value]! !
+
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:38'!
+propertyValueAt: propName put: propValue
+	"Set or add the property with key propName and value propValue.
+	 If the receiver does not yet have a method properties create one and replace
+	 the selector with it.  Otherwise, either relace propValue in the method properties
+	 or replace method properties with one containing the new property."
+	| propertiesOrSelector |
+	(propertiesOrSelector := self penultimateLiteral) isMethodProperties ifFalse:
+		[self penultimateLiteral: ((MAdditionalMethodState
+									selector: propertiesOrSelector
+									with: (Association
+											key: propName asSymbol
+											value: propValue))
+									setMethod: self;
+									yourself).
+		^propValue].
+	(propertiesOrSelector includesProperty: propName) ifTrue:
+		[^propertiesOrSelector at: propName put: propValue].
+	self penultimateLiteral: (propertiesOrSelector
+								copyWith: (MAssociation
+												key: propName asSymbol
+												value: propValue)).
+	^propValue! !
+
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:41'!
+removeProperty: propName
+	"Remove the property propName if it exists.
+	 Do _not_ raise an error if the property is missing."
+	| value |
+	value := self propertyValueAt: propName ifAbsent: [^nil].
+	self penultimateLiteral: (self penultimateLiteral copyWithout:
+									(MAssociation
+										key: propName
+										value: value)).
+	^value! !
+
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:48'!
+selector
+	"Answer a method's selector.  This is either the penultimate literal,
+	 or, if the method has any properties or pragmas, the selector of
+	 the MethodProperties stored in the penultimate literal."
+	| penultimateLiteral | 
+	^(penultimateLiteral := self penultimateLiteral) isMethodProperties
+		ifTrue: [penultimateLiteral selector]
+		ifFalse: [penultimateLiteral]! !
+
+!MCompiledMethod methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:48'!
+selector: aSelector
+	"Set a method's selector.  This is either the penultimate literal,
+	 or, if the method has any properties or pragmas, the selector of
+	 the MethodProperties stored in the penultimate literal."
+	| penultimateLiteral nl | 
+	(penultimateLiteral := self penultimateLiteral) isMethodProperties
+		ifTrue: [penultimateLiteral selector: aSelector]
+		ifFalse: [(nl := self numLiterals) < 2 ifTrue:
+					[self error: 'insufficient literals to hold selector'].
+				self literalAt: nl - 1 put: aSelector]! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+MCompiledMethod class
+	instanceVariableNames: ''!
+	
 
-MObject subclass: #MContext
-	instanceVariableNames: 'sender pc stackp '
+MObject subclass: #MInstructionStream
+	instanceVariableNames: 'sender pc'
+	classVariableNames: 'SpecialConstants'
+	poolDictionaries: ''
+	category: 'MSqueak-Methods'!
+
+!MInstructionStream methodsFor: 'as yet unclassified' stamp: 'sw 8/23/2018 00:09'!
+method
+	"Answer the compiled method that supplies the receiver's bytecodes."
+
+	^sender		"method access when used alone (not as part of a context)"! !
+
+!MInstructionStream methodsFor: 'as yet unclassified' stamp: 'sw 8/22/2018 23:31'!
+pc
+	^ pc! !
+
+!MInstructionStream methodsFor: 'as yet unclassified' stamp: 'sw 8/22/2018 23:29'!
+privSender: aContext 
+
+	sender := aContext! !
+
+!MInstructionStream methodsFor: 'as yet unclassified' stamp: 'sw 8/22/2018 23:29'!
+sender
+	^ sender! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+MInstructionStream class
+	instanceVariableNames: ''!
+
+
+MInstructionStream subclass: #MContextPart
+	instanceVariableNames: 'stackp'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MSqueak-Methods'!
-!MContext commentStamp: '<historical>' prior: 0!
+!MContextPart commentStamp: '<historical>' prior: 0!
 Contexts are used by the virtual machine to represent stack frames. This is an abstract class. My two concrete subclasses are used to represent block and method stack frames.
 !
 
-
-!MContext methodsFor: 'accessing' stamp: 'jm 10/28/2003 13:10'!
-sender
-	"Answer the context that sent the message that created the receiver."
-
-	^ sender
-! !
-
-
-!MContext methodsFor: 'other' stamp: 'jm 12/31/2003 09:37'!
+!MContextPart methodsFor: 'other' stamp: 'jm 12/31/2003 09:37'!
 blockCopy: numArgs 
 	"Primitive. Distinguish a block of code from its enclosing method by creating a new BlockContext for that block. The compiler inserts into all methods that contain blocks the bytecodes to send the message blockCopy:. Do not use blockCopy: in code that you write!! Only the compiler can decide to send the message blockCopy:. Fail if numArgs is not a SmallInteger. Optional. No Lookup. See Object documentation whatIsAPrimitive."
 
@@ -92,12 +611,31 @@ blockCopy: numArgs
 		nargs: numArgs
 ! !
 
+!MContextPart methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:16'!
+stackp: newStackp
+	"Storing into the stack pointer is a potentially dangerous thing.
+	This primitive stores nil into any cells that become accessible as a result,
+	and it performs the entire operation atomically."
+	"Once this primitive is implemented, failure code should cause an error"
+
+	<primitive: 76>
+	self error: 'stackp store failure'.
+"
+	stackp == nil ifTrue: [stackp := 0].
+	newStackp > stackp  'effectively checks that it is a number'
+		ifTrue: [oldStackp := stackp.
+				stackp := newStackp.
+				'Nil any newly accessible cells'
+				oldStackp + 1 to: stackp do: [:i | self at: i put: nil]]
+		ifFalse: [stackp := newStackp]
+"! !
+	
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-MContext class
+MContextPart class
 	instanceVariableNames: ''!
 
-!MContext class methodsFor: 'instance creation' stamp: 'jm 11/30/2003 16:54'!
+!MContextPart class methodsFor: 'instance creation' stamp: 'jm 11/30/2003 16:54'!
 newForMethod: aMethod
 	"This is the only method for creating new contexts, other than by using the clone primitive. Any other attempts, such as inherited methods like shallowCopy, should be avoided or must at least be rewritten to determine the proper size for the method that will use this context. This is because asking a context its size (even basicSize!!) will not return the actual object size but only the number of fields currently accessible, as determined by stackp."
 
@@ -105,7 +643,7 @@ newForMethod: aMethod
 ! !
 
 
-MContext variableSubclass: #MBlockContext
+MContextPart variableSubclass: #MBlockContext
 	instanceVariableNames: 'nargs startpc home '
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -209,6 +747,45 @@ valueWithArguments: anArray
 	anArray size = nargs
 		ifTrue: [self error: 'Attempt to evaluate a block that is already being evaluated.']
 		ifFalse: [self error: 'This block requires ', nargs printString, ' arguments.']
+		! !
+
+!MBlockContext methodsFor: 'as yet unclassified' stamp: 'sw 8/23/2018 00:02'!
+asContext
+
+	^ self! !
+
+!MBlockContext methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:32'!
+instVarAt: index put: value
+	index = 3 ifTrue: [self stackp: value. ^ value].
+	^ super instVarAt: index put: value! !
+
+!MBlockContext methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:18'!
+on: exception do: handlerAction
+	"Evaluate the receiver in the scope of an exception handler."
+
+	<primitive: 199>  "just a marker, fail and execute the following"
+	^ self value! !
+
+!MBlockContext methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:19'!
+receiver 
+	"Refer to the comment in ContextPart|receiver."
+
+	^home receiver! !
+
+!MBlockContext methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:15'!
+valueWithPossibleArgs: anArray 
+
+     "Evaluate the block represented by the receiver. 
+     If the block requires arguments, take them from anArray. If anArray is too
+     large, the rest is ignored, if it is too small, use nil for the other arguments"
+
+	self numArgs = 0 ifTrue: [^self value].
+	self numArgs = anArray size ifTrue: [^self valueWithArguments: anArray].
+	self numArgs > anArray size ifTrue: [
+		^self valueWithArguments: anArray,
+				(MArray new: (self numArgs - anArray size))
+	].
+	^self valueWithArguments: (anArray copyFrom: 1 to: self numArgs)
 ! !
 
 
@@ -265,9 +842,15 @@ printOn: aStream
 		nextPutAll: ' args: ', arguments printString.
 ! !
 
+!MMessage methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:32'!
+numArgs
+	"Answer the number of arguments in this message"
+
+	^arguments size! !
+
 
-MContext variableSubclass: #MMethodContext
-	instanceVariableNames: 'method receiverMap receiver '
+MContextPart variableSubclass: #MMethodContext
+	instanceVariableNames: 'method closureOrNil receiver '
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MSqueak-Methods'!
@@ -292,6 +875,50 @@ removeSelf
 	^ result
 ! !
 
+!MMethodContext methodsFor: 'as yet unclassified' stamp: 'sw 8/23/2018 00:09'!
+asContext
+
+	^ self! !
+
+!MMethodContext methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:32'!
+home 
+	"Answer the context in which the receiver was defined."
+
+	closureOrNil == nil ifTrue:
+		[^self].
+	^closureOrNil outerContext home! !
+
+!MMethodContext methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:32'!
+instVarAt: index put: value
+	index = 3 ifTrue: [self stackp: value. ^ value].
+	^ super instVarAt: index put: value! !
+
+!MMethodContext methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:33'!
+outerContext
+	"Answer the context within which the receiver is nested."
+
+	^closureOrNil == nil ifFalse:
+		[closureOrNil outerContext]! !
+
+!MMethodContext methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:32'!
+receiver 
+	"Refer to the comment in ContextPart|receiver."
+
+	^receiver! !
+
+!MMethodContext methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:17'!
+setSender: s receiver: r method: m closure: c startpc: startpc
+	"Create the receiver's initial state."
+
+	sender := s.
+	receiver := r.
+	method := m.
+	closureOrNil := c.
+	pc := startpc.
+	stackp := 0! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+	
 
 MDictionary variableSubclass: #MMethodDictionary
 	instanceVariableNames: ''
@@ -448,6 +1075,17 @@ swap: oneIndex with: otherIndex
 	super swap: oneIndex with: otherIndex.
 ! !
 
+!MMethodDictionary methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 23:22'!
+keyAtValue: value ifAbsent: exceptionBlock
+	"Answer the key whose value equals the argument, value. If there is
+	none, answer the result of evaluating exceptionBlock."
+	
+	value ifNotNil: [
+		1 to: self basicSize do: [ :index |
+			(array at: index) = value ifTrue: [
+				^self basicAt: index ] ] ].
+	^exceptionBlock value! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 MMethodDictionary class
@@ -464,16 +1102,51 @@ new: nElements
 ! !
 
 
-MObject subclass: #MMethodProperties
-	instanceVariableNames: 'properties pragmas selector'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'MSqueak-Methods'!
-
-
 MObject subclass: #MPragma
 	instanceVariableNames: 'method keyword arguments'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MSqueak-Methods'!
+
+!MPragma methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:34'!
+arguments
+	"Answer the arguments of the receiving pragma. For a pragma defined as <key1: val1 key2: val2> this will answer #(val1 val2)."
+
+	^ arguments! !
+
+!MPragma methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:34'!
+key
+	"Answer the keyword of the pragma (the selector of its message pattern).
+	 This accessor provides polymorphism with Associations used for properties."
+	^keyword! !
+
+!MPragma methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:34'!
+keyword
+	"Answer the keyword of the pragma (the selector of its message pattern).
+	 For a pragma defined as <key1: val1 key2: val2> this will answer #key1:key2:."
+
+	^ keyword! !
+
+!MPragma methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:34'!
+method
+	"Answer the compiled-method containing the pragma."
+
+	^ method! !
+
+!MPragma methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:34'!
+numArgs
+	"Answer the number of arguments in the pragma."
+
+	^ self arguments size.! !
+
+!MPragma methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:34'!
+selector
+	"Answer the selector of the method containing the pragma.
+	 Do not confuse this with the selector of the pragma's message pattern."
+
+	^method selector! !
+
+!MPragma methodsFor: 'as yet unclassified' stamp: 'sw 8/21/2018 22:37'!
+setMethod: aCompiledMethod
+	method := aCompiledMethod! !
 

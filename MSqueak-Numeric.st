@@ -1987,6 +1987,14 @@ identityHash
 	^ self
 ! !
 
+!MSmallInteger methodsFor: 'comparing' stamp: 'yo 11/4/2010 22:34'!
+scaledIdentityHash
+	"For identityHash values returned by primitive 75, answer
+	such values times 2^18.  Otherwise, match the existing
+	identityHash implementation"
+	
+	^self! !
+
 !MSmallInteger methodsFor: 'comparing'!
 ~= aNumber 
 	"Primitive. Compare the receiver with the argument and answer true if

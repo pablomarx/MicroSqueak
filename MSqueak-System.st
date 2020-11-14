@@ -30,14 +30,14 @@ graphicsTest
 	f fillRectX: 0 y: 0 w: 30 h: 30.
 ! !
 
-!MSystem class methodsFor: 'system startup' stamp: 'jm 10/1/2008 20:52'!
+!MSystem class methodsFor: 'system startup' stamp: 'sw 7/16/2016 21:50'!
 start
 	"This method is called when the image is started. Add a call to your own code here."
 	"MSystem start"
 
 	self log: 'Welcome to MicroSqueak!!'.
 	self log: self tinyBenchmarks.
-	self log: MForm new primScreenSize printString.
+"	self log: MForm new primScreenSize printString. "
 	self beep.
 	self beep.
 	"self graphicsTest."
@@ -75,6 +75,10 @@ milliseconds
 	^ 0
 ! !
 
+!MSystem class methodsFor: 'misc' stamp: 'sw 7/16/2016 22:03'!
+putchar: ch
+	<primitive: 249>! !
+
 !MSystem class methodsFor: 'misc' stamp: 'jm 12/9/2003 00:08'!
 tinyBenchmarks
 	"Report the results of running the two tiny Squeak benchmarks."
@@ -86,7 +90,6 @@ tinyBenchmarks
 	^ ((n * 500000 * 1000) // t1) printString, ' bytecodes/sec; ',
 	  ((r * 1000) // t2) printString, ' sends/sec'
 ! !
-
 
 !MSystem class methodsFor: 'primitives' stamp: 'jm 10/1/2008 20:15'!
 append: aString toFile: fileName
@@ -100,7 +103,7 @@ append: aString toFile: fileName
 	f cr.
 	f close.
 
-	! !
+! !
 
 !MSystem class methodsFor: 'primitives' stamp: 'jm 12/2/2003 08:09'!
 exitToDebugger
@@ -147,11 +150,10 @@ incrementalGarbageCollect
 	<primitive: 131>
 ! !
 
-!MSystem class methodsFor: 'primitives' stamp: 'jm 10/1/2008 20:12'!
+!MSystem class methodsFor: 'primitives' stamp: 'sw 7/16/2016 22:18'!
 log: aString
-
 	self append: aString toFile: 'log.txt'.
-	! !
+! !
 
 !MSystem class methodsFor: 'primitives' stamp: 'jm 11/24/2003 21:00'!
 primKeyboardNext

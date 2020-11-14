@@ -233,7 +233,9 @@ fileOutClasses
 
 	| f |
 	f _ FileStream newFileNamed: 'MicroSqueakClasses.st'.
-	SystemOrganization fileOutCategoriesMatching: 'MSqueak-*' on: f.
+	(SystemOrganization categoriesMatching: 'MSqueak-*') do: [ :cat |
+		SystemOrganization fileOutCategory:cat on: f.
+	].
 	f close.
 ! !
 
@@ -413,8 +415,8 @@ buildSpecialObjectsArray
 
 	"Note: This must be fixed once we start using context prototypes"
 	specialObjects at: 36 put: ((globals at: #MethodContext) new: 56).  "size is CompiledMethod fullFrameSize"
-	specialObjects at: 37 put: nil.
-	specialObjects at: 38 put: ((globals at: #BlockContext) new: 56).  "size is CompiledMethod fullFrameSize"
+	specialObjects at: 37 put: (globals at: #BlockClosure).  
+	specialObjects at: 38 put: nil.
 
 	specialObjects at: 39 put: Array new.  "array of objects referred to by C support code"
 	specialObjects at: 40 put: nil.  "was PseudoContext"
@@ -517,8 +519,11 @@ fixGlobalReferences
 				(lit isKindOf: Association) ifTrue: [
 					m objectAt: i + 1 put: (self mapGlobalAssociation: lit)
 				].
-				(lit isKindOf: MethodProperties) ifTrue: [
-					m pragmas do: [ :p | p setMethod: m ].
+				(lit isKindOf: ReadOnlyVariableBinding) ifTrue: [
+					m objectAt: i + 1 put: (self mapReadOnlyVariableBinding: lit)
+				].
+				(lit isKindOf: AdditionalMethodState) ifTrue: [
+					lit setMethod: m.
 				].
 			]
 		]
@@ -547,6 +552,17 @@ mapGlobalAssociation: anAssociation
 		ifAbsent: [self halt: 'Ref to a class not in globals: ', k. ^ (k -> nil)].
 ! !
 
+!MicroSqueakImageBuilder methodsFor: 'object creation' stamp: 'sw 8/21/2018 22:27'!
+mapReadOnlyVariableBinding: binding
+	| value |
+	value := binding value.
+	(value isKindOf: Class) ifFalse: [
+		^ binding.
+	].
+
+	^ ReadOnlyVariableBinding key:(binding key) value:(globals at: (value name asSymbol)).
+! !
+
 !MicroSqueakImageBuilder methodsFor: 'object creation' stamp: 'jm 11/27/2003 11:00'!
 methodDictFromSqueak: aMethodDictionary
 	"Answer a new method dictionary created from the given Squeak method dictionary."
@@ -559,7 +575,7 @@ methodDictFromSqueak: aMethodDictionary
 
 	result _ MethodDictionary new: sz.
 	aMethodDictionary keys do: [:sel |
-		meth _ (aMethodDictionary at: sel) copyWithTrailerBytes: #().
+		meth _ (aMethodDictionary at: sel) copyWithTrailerBytes: (CompiledMethodTrailer empty).
 		result at: sel put: meth].
 	^ result
 ! !
@@ -693,7 +709,7 @@ writeMemoryImage: aByteArray toFileNamed: fileName
 	f _ (FileStream newFileNamed: fileName) binary.
 
 	"write squeak image file header (64 bytes)"
-	f int32: 6502.					"image format and version id"
+	f int32: 6504.					"image format and version id"
 	f int32: 64.						"header size (bytes)"
 	f int32: aByteArray size.		"image size (bytes)"
 	f int32: 0.						"location of start of image in memory"

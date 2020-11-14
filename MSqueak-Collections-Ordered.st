@@ -894,6 +894,11 @@ cr
 	^ self with: MCharacter cr
 ! !
 
+!MByteString class methodsFor: 'constants' stamp: 'sw 8/21/2018 22:20'!
+empty
+	"A canonicalized empty String instance."
+	^ ''! !
+
 
 MByteString variableByteSubclass: #MByteSymbol
 	instanceVariableNames: ''
