@@ -1,3 +1,10 @@
+MObject subclass: #MClassBinding
+	instanceVariableNames: 'key value'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'MSqueak-Collections-Support'!
+
+	
 MObject subclass: #MReadOnlyVariableBinding
 	instanceVariableNames: 'key value'
 	classVariableNames: ''

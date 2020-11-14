@@ -519,15 +519,34 @@ fixGlobalReferences
 				(lit isKindOf: Association) ifTrue: [
 					m objectAt: i + 1 put: (self mapGlobalAssociation: lit)
 				].
-				(lit isKindOf: ReadOnlyVariableBinding) ifTrue: [
-					m objectAt: i + 1 put: (self mapReadOnlyVariableBinding: lit)
+				(lit isKindOf: ClassBinding) ifTrue: [
+					m objectAt: i + 1 put: (self mapClassBinding: lit)
+				].
+				(lit isKindOf: Global) ifTrue: [
+					m objectAt: i + 1 put: (self mapGlobalAssociation: lit)
 				].
 				(lit isKindOf: AdditionalMethodState) ifTrue: [
 					lit setMethod: m.
-				].
+				].			
 			]
 		]
 	].
+! !
+
+!MicroSqueakImageBuilder methodsFor: 'object creation' stamp: 'sw 08/23/2018 17:13'!
+mapClassBinding: binding
+	| value nonMetaName |
+	value := binding value.
+	(value isKindOf: Class) ifFalse: [
+		^ binding.
+	].
+
+	value := globals at: (value name asSymbol) ifAbsent: [
+		nonMetaName := value name.
+		nonMetaName := nonMetaName copyFrom: 2 to: nonMetaName size.  "remove leading 'M'"
+		globals at: nonMetaName asSymbol.
+	].
+	^ ClassBinding key:(binding key) value:value.
 ! !
 
 !MicroSqueakImageBuilder methodsFor: 'object creation' stamp: 'jm 11/30/2003 10:13'!
