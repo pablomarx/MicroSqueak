@@ -463,3 +463,17 @@ new: nElements
 	^ (self basicNew: size) init: size
 ! !
 
+
+MObject subclass: #MMethodProperties
+	instanceVariableNames: 'properties pragmas selector'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'MSqueak-Methods'!
+
+
+MObject subclass: #MPragma
+	instanceVariableNames: 'method keyword arguments'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'MSqueak-Methods'!
+

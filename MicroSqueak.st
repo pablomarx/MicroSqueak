@@ -515,7 +515,14 @@ fixGlobalReferences
 			1 to: m numLiterals do: [:i |
 				lit _ m objectAt: i + 1.  "offset by 1 for the method header word"
 				(lit isKindOf: Association) ifTrue: [
-					m objectAt: i + 1 put: (self mapGlobalAssociation: lit)]]]].
+					m objectAt: i + 1 put: (self mapGlobalAssociation: lit)
+				].
+				(lit isKindOf: MethodProperties) ifTrue: [
+					m pragmas do: [ :p | p setMethod: m ].
+				].
+			]
+		]
+	].
 ! !
 
 !MicroSqueakImageBuilder methodsFor: 'object creation' stamp: 'jm 11/30/2003 10:13'!
@@ -550,7 +557,7 @@ methodDictFromSqueak: aMethodDictionary
 		ifTrue: [sz _ 1]
 		ifFalse: [sz _ 2 raisedTo: (aMethodDictionary size log: 2) ceiling].
 
-	result _ (MethodDictionary basicNew: sz) init: sz.
+	result _ MethodDictionary new: sz.
 	aMethodDictionary keys do: [:sel |
 		meth _ (aMethodDictionary at: sel) copyWithTrailerBytes: #().
 		result at: sel put: meth].
