@@ -184,7 +184,11 @@ basicCopy
 printOn: aStream
 
 	aStream nextPut: $$.
-	aStream nextPut: self.
+	MObject superclass ifNil: [
+		aStream nextPut: self.
+	] ifNotNil: [
+		aStream nextPut: (Character value: (self asciiValue)).
+	].
 ! !
 
 
@@ -268,7 +272,10 @@ value: anInteger
 	| ch |
 	CharacterTable ifNil: [CharacterTable := MArray new: 256].
 	ch := CharacterTable at: anInteger + 1.
-	ch ifNil: [ ch := super new. ch instVarAt:1 put: anInteger. ch. ].
+	ch ifNil: [
+		ch := super new. ch instVarAt:1 put: anInteger. ch. 
+		CharacterTable at: (anInteger + 1) put: ch.
+	].
 	^ ch.
 ! !
 

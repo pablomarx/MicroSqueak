@@ -115,14 +115,14 @@ size
 primClose: id
 	"Close this file. Don't raise an error if the primitive fails."
 
-	<primitive: 151>
+	<primitive: 'primitiveFileClose' module: 'FilePlugin'>
 ! !
 
 !MFile methodsFor: 'primitives' stamp: 'jm 11/24/2003 18:47'!
 primGetPosition: id
 	"Get this files current position."
 
-	<primitive: 152>
+	<primitive: 'primitiveFileGetPosition' module: 'FilePlugin'>
 	self primitiveFailed
 ! !
 
@@ -143,7 +143,7 @@ primOpen: fileName writable: writableFlag
 		if the file exists, open it read-only
 		else return nil"
 
-	<primitive: 153>
+	<primitive: 'primitiveFileOpen' module: 'FilePlugin'>
 	self primitiveFailed
 ! !
 
@@ -152,15 +152,17 @@ primRead: id into: byteArray startingAt: startIndex count: count
 	"Read up to count elements into the given buffer and answer the number of elements actually read. The buffer may either a byte- or word-indexable object."
 
 
-	<primitive: 154>
-	self primitiveFailed
+	<primitive: 'primitiveFileRead' module: 'FilePlugin'>
+	self closed
+		ifTrue: [^ self error: 'File is closed'].
+	self error: 'File read failed'
 ! !
 
 !MFile methodsFor: 'primitives' stamp: 'jm 11/24/2003 20:01'!
 primSetPosition: id to: anInteger
 	"Set this file to the given position."
 
-	<primitive: 155>
+	<primitive: 'primitiveFileSetPosition' module: 'FilePlugin'>
 	self primitiveFailed
 ! !
 
@@ -168,7 +170,7 @@ primSetPosition: id to: anInteger
 primSize: id
 	"Answer the size of this file."
 
-	<primitive: 157>
+	<primitive: 'primitiveFileSize' module: 'FilePlugin'>
 	self primitiveFailed
 ! !
 
@@ -176,8 +178,10 @@ primSize: id
 primWrite: id from: buffer startingAt: startIndex count: count
 	"Write up to count elements from the given buffer and answer the number of elements actually written. The buffer may either a byte- or word-indexable object."
 
-	<primitive: 158>
-	self primitiveFailed
+	<primitive: 'primitiveFileWrite' module: 'FilePlugin'>
+	self closed
+		ifTrue: [^ self error: 'File is closed'].
+	self error: 'File write failed'
 ! !
 
 

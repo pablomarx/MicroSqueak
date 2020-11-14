@@ -321,20 +321,19 @@ buildCompactClassArray
 	| ccNames c |
 	ccNames _ #(
 		CompiledMethod
-		ByteSymbol
+		nil
 		Array
-		ByteArray
-		LargePositiveInteger
 		LargeNegativeInteger
-		MethodDictionary
-		Association
-		Metaclass
-		Character
-		ByteString
+		LargePositiveInteger
 		Float
+		nil
+		Association
+		nil
+		nil 
+		ByteString
+		nil
 		BlockContext
 		MethodContext
-		Dictionary
 	).
 	(ccNames indexOf: #BlockContext) = (Smalltalk compactClassesArray indexOf: BlockContext)
 		ifFalse: [self error: 'The VM depends on BlockContext''s compact class index'].
@@ -343,8 +342,11 @@ buildCompactClassArray
 
 	"fix the compact class index in the class format words"
 	ccNames withIndexDo: [:cName :i |
-		c _ globals at: cName ifAbsent: [nil].
-		c ifNotNil: [c setCompactClassIndex: i]].
+		cName ifNotNil: [
+			c _ globals at: cName ifAbsent: [nil].
+			c ifNotNil: [c setCompactClassIndex: i]
+		].
+	].
 
 	^ (ccNames collect: [:cName | globals at: cName ifAbsent: [nil]]),
 		(Array new: (31 - ccNames size) withAll: nil).

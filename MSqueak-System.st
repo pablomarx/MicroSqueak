@@ -85,8 +85,8 @@ tinyBenchmarks
 
 	| n t1 t2 r |
 	n _ 25.
-	t1 _ [n benchmark] msecs.
-	t2 _ [r _ 28 benchFib] msecs.
+	t1 _ [n benchmark] timeToRun.
+	t2 _ [r _ 28 benchFib] timeToRun.
 	^ ((n * 500000 * 1000) // t1) printString, ' bytecodes/sec; ',
 	  ((r * 1000) // t2) printString, ' sends/sec'
 ! !

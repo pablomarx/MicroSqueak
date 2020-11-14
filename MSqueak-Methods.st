@@ -228,7 +228,7 @@ method
 	^outerContext method! !
 
 !MBlockClosure methodsFor: 'as yet unclassified' stamp: 'sw 8/23/2018 00:23'!
-msecs
+timeToRun
 	"Answer the number of milliseconds it took to evaluate this block."
 
 	| startMSecs |
@@ -706,7 +706,7 @@ ifError: errorHandlerBlock
 ! !
 
 !MBlockContext methodsFor: 'evaluating' stamp: 'jm 12/9/2003 00:07'!
-msecs
+timeToRun
 	"Answer the number of milliseconds it took to evaluate this block."
 
 	| startMSecs |
